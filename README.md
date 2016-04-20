@@ -6,6 +6,6 @@ In order to profile a certain distributed application, one needs to devise a sel
 
 Once a user constructed a selector which is able to resolve the correct PID's, one needs to run the sampling frequency, sampling duration, and the hosts he or she wants to profile. One could also specify the YARN cluster address. Hprofiler would then automatically fetch the cluster nodes and initiate SSH connections to them in order to determine if PID's related to the user-provided selector are available and thus marking a host as "in use". Taking the example from above, running hprofiler could be as simple as this:
 
-' sh hprofiler.sh -f 300 -t 60 -c [cluster address] -j "grep 123456789" -o results
+sh hprofiler.sh -f 300 -t 60 -c [cluster address] -j "grep 123456789" -o results
 
 This command will sample the PID's obtained with the selector with a frequency of 300 Hz for 60 seconds. When the profiler is done sampling the program stacks, it will aggregate them, build a FlameGraph and put the results of all host in the results folder. Finally, it will do a final aggregation on a cluster level, in order to provide the user with a "cluster average" utilisation. However, in order to profile an application, one needs to add some JVM flags in order to enable stack walking on the JVM (-XX:+PreserveFramePointer -XX:InlineSmallCode=200), as discussed in the "Hadoop Profiler" section above.
