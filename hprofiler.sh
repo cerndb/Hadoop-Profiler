@@ -71,7 +71,7 @@ while getopts "o:j:h:f:t:c:irde" opt; do
         d)
             detect_anomalies=true
             ;;
-        i)    
+        i)
             enable_io=true
             ;;
         r)
@@ -145,7 +145,7 @@ cat aggregated/stackcollapse.data | $current_directory/src/flamegraph/flamegraph
 find profiler_* -type d -empty -delete
 
 # Check if the Hadoop extraction needs to be done.
-if [[ $extract_hadop == true ]]; then
+if [[ $extract_hadoop == true ]]; then
     # Move into the aggregated folder.
     cd aggregated
     # Filter out non Hadoop related information.
