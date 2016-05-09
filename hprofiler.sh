@@ -161,7 +161,9 @@ if [[ $detect_anomalies == true ]]; then
     echo "\n\n\n\nDetecting anomalies..."
     echo "Listing anomalies:"
     echo "------------------"
-    echo "TODO IMPLEMENT."
+    # Fetch the absolute directory of the results folder.
+    # Execute the outlier detection script.
+    python src/outlier_detection.py $output_directory
     # Identifying the majority and anomily sets.
     echo "------------------"
     echo "Done"
