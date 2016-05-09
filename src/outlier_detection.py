@@ -80,6 +80,43 @@ def obtain_dimensionality(datafile):
 
     return num_dimensions
 
+def print_legend(aggregators):
+    print("\nLegend:\n-------")
+    nAggregators = len(aggregators)
+    for i in range(0, nAggregators):
+        print(str(i + 1) + ": " + aggregators[i])
+
+def print_similarity_matrix(matrix):
+    global ENDS
+
+    print("\n")
+    nElements = len(matrix[0])
+    length = nElements % 10 + 1
+
+    # Draw the content of the similarity matrix.
+    for i in range(0, nElements):
+        line = str(i + 1).ljust(length + 2)
+        for j in range(0, nElements):
+            if(i == j):
+                line += "/ "
+                continue
+            if(matrix[i][j] == 0):
+                line += "X "
+                continue
+            color = get_color(matrix[i][j])
+            line += color + "0 " + ENDS
+        print(line)
+
+def get_color(value):
+    if(value > 0.6):
+        color = GREEN
+    elif(value >= 0.4 and value <= 0.6):
+        color = ORANGE
+    else:
+        color = RED
+
+    return color
+
 def detect_outliers(output_directory):
     global GREEN
     global ORANGE
@@ -113,6 +150,9 @@ def detect_outliers(output_directory):
     max_formatting_length = 2 * max_dir_length + 4 + 5
     # Print the cosine similiarty between all aggregators.
     nDirectories = len(directories)
+    # Initialize the similarity matrix.
+    similarityMatrix = [[0] * nDirectories for i in range(nDirectories)]
+    # Compute the similarities.
     for i in range(0, nDirectories):
         d1 = directories[i]
         vd1 = vectors[d1]
@@ -122,15 +162,15 @@ def detect_outliers(output_directory):
             sim = cosine_similarity(vd1, vd2)
             # Only possible if no data is available
             if(sim == 0):
+                similarityMatrix[i][j] = int(0)
                 continue
+            similarityMatrix[i][j] = sim
+            similarityMatrix[j][i] = sim
             info = str(d1 + " vs " + d2 + ": ").ljust(max_formatting_length)
-            if(sim > 0.6):
-                color = GREEN
-            elif(sim >= 0.4 and sim <= 0.6):
-                color = ORANGE
-            else:
-                color = RED
+            color = get_color(sim)
             print(color + info + ENDS + str(sim))
+    print_legend(directories)
+    print_similarity_matrix(similarityMatrix)
 
 def main():
     num_arguments = len(sys.argv)
