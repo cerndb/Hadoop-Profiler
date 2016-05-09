@@ -4,6 +4,15 @@ import os
 import sys
 import math
 
+## BEGIN Terminal color definitions. ########################################################
+
+GREEN = '\033[92m'
+ORANGE = '\033[93m'
+RED = '\033[91m'
+ENDS = '\033[0m'
+
+## END Terminal color definitions. ##########################################################
+
 def cosine_similarity(v1, v2):
     n = len(v1)
 
@@ -72,6 +81,11 @@ def obtain_dimensionality(datafile):
     return num_dimensions
 
 def detect_outliers(output_directory):
+    global GREEN
+    global ORANGE
+    global RED
+    global ENDS
+
     if(not output_directory.endswith("/")):
         output_directory += "/"
     # Fetch all hosts on which a profile has been made.
@@ -90,6 +104,13 @@ def detect_outliers(output_directory):
         # Check if a valid vector is present.
         if(not (vector == None)):
             vectors[profile] = vector
+    # Fetch the longest string length for formatting.
+    max_dir_length = 0
+    for dir in directories:
+        length = len(dir)
+        if(length > max_dir_length):
+            max_dir_length = length
+    max_formatting_length = 2 * max_dir_length + 4 + 5
     # Print the cosine similiarty between all aggregators.
     nDirectories = len(directories)
     for i in range(0, nDirectories):
@@ -102,21 +123,14 @@ def detect_outliers(output_directory):
             # Only possible if no data is available
             if(sim == 0):
                 continue
-            print(d1 + " vs " + d2 + ": " + str(sim))
-
-
-    vector_1511 = vectors['profiler_itrac1511.cern.ch']
-    #print(vector_1511)
-    vector_p0 = vectors['profiler_p05153074600927.cern.ch']
-    #print(vector_p0)
-    #print(str(vector_1511.index(208)))
-    #print(str(vector_p0.index(181)))
-    key1 = list(mapping.values()).index(vector_1511.index(208))
-    key2 = list(mapping.values()).index(vector_p0.index(181))
-    #print("Key 1 index: " + str(key1))
-    #print("Key 2 index: " + str(key2))
-    #print(list(mapping.keys())[key1])
-    #print(list(mapping.keys())[key2])
+            info = str(d1 + " vs " + d2 + ": ").ljust(max_formatting_length)
+            if(sim > 0.6):
+                color = GREEN
+            elif(sim >= 0.4 and sim <= 0.6):
+                color = ORANGE
+            else:
+                color = RED
+            print(color + info + ENDS + str(sim))
 
 def main():
     num_arguments = len(sys.argv)
