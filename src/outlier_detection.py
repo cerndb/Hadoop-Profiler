@@ -80,22 +80,20 @@ def obtain_dimensionality(datafile):
 
     return num_dimensions
 
-def print_legend(aggregators):
-    print("\nLegend:\n-------")
-    nAggregators = len(aggregators)
-    for i in range(0, nAggregators):
-        print(str(i + 1) + ": " + aggregators[i])
-
-def print_similarity_matrix(matrix):
+def print_similarity_matrix(matrix, directories):
     global ENDS
 
     print("\n")
     nElements = len(matrix[0])
-    length = nElements % 10 + 1
+    length = 0
+    for dir in directories:
+        n = len(dir)
+        if(n > length):
+            length = n
 
     # Draw the content of the similarity matrix.
     for i in range(0, nElements):
-        line = str(i + 1).ljust(length + 2)
+        line = directories[i].ljust(length + 2)
         for j in range(0, nElements):
             if(i == j):
                 line += "/ "
@@ -169,8 +167,7 @@ def detect_outliers(output_directory):
             info = str(d1 + " vs " + d2 + ": ").ljust(max_formatting_length)
             color = get_color(sim)
             print(color + info + ENDS + str(sim))
-    print_legend(directories)
-    print_similarity_matrix(similarityMatrix)
+    print_similarity_matrix(similarityMatrix, directories)
 
 def main():
     num_arguments = len(sys.argv)
