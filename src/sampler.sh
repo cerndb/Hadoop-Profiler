@@ -88,7 +88,7 @@ do
     [[ -e $mapfile ]] && rm $mapfile
     # Check if I/O sampling needs to be performed.
     if [[ $enable_io == true ]]; then
-        perf record -T -F $sampling_frequency -a -g -p $pid -e context-switches \
+        perf record -T -F $sampling_frequency -a -g -p $pid \
              -e sched:sched_switch \
              -e sched:sched_stat_sleep \
              -e sched:sched_process_exit -o perf.data.raw -- sleep $sampling_duration &&
