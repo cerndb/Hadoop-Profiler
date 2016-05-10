@@ -88,7 +88,7 @@ do
     [[ -e $mapfile ]] && rm $mapfile
     # Check if I/O sampling needs to be performed.
     if [[ $enable_io == true ]]; then
-        perf record -F $sampling_frequency -o perf.data -a -g -p $pid -e context-switches -- sleep $sampling_duration &&
+        perf record -T -F $sampling_frequency -o perf.data -a -g -p $pid -e context-switches -- sleep $sampling_duration &&
         $(eval $cmd) &&
         chown root $mapfile &&
         chmod 666 $mapfile &&
