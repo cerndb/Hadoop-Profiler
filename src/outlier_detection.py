@@ -51,7 +51,7 @@ def obtain_vector(dimensionality, mapping, profile_dir):
             if(value > 40):
                 vector[index] = value
             else:
-                vector[index] = value
+                vector[index] = 0
 
     return vector
 
