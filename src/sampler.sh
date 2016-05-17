@@ -89,11 +89,11 @@ do
     [[ -e $mapfile ]] && rm $mapfile
     # Check if I/O sampling needs to be performed.
     if [[ $enable_io == true ]]; then
-        perf record --call-graph=fp -T -F $sampling_frequency -a -g -p $pid \
+        perf record --call-graph=fp -p $pid \
              -e 'sched:sched_switch' \
              -e 'sched:sched_stat_sleep' \
              -e 'sched:sched_stat_blocked' -o perf.data.raw -- sleep $sampling_duration &&
-        perf inject -v -s -i perf.data.raw -o perf.data &&
+        perf inject -i perf.data.raw -o perf.data &&
         $(eval $cmd) &&
         chown root $mapfile &&
         chmod 666 $mapfile &&
