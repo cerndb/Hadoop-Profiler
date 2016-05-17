@@ -133,5 +133,12 @@ done <<< "$pids"
 # Aggregate all data files.
 python $scripts_root/stack_aggregation.py $destination_file $data_files
 
+# Set the default coloring method of the flamegraph, in the other case, set the io color.
+if [[ $enable_io == true ]]; then
+    color=io
+else
+    color=java
+fi
+
 # Aggreate stackcollapse data to a flamegraph on host level.
-cat aggregated/stackcollapse.data | $scripts_root/flamegraph/flamegraph.pl --color=java --hash > aggregated/flamegraph.svg
+cat aggregated/stackcollapse.data | $scripts_root/flamegraph/flamegraph.pl --color=$color --hash > aggregated/flamegraph.svg
