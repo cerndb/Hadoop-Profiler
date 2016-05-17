@@ -155,6 +155,8 @@ if [[ $extract_hadoop == true ]]; then
     # Move back to th upper folder.
     cd ..
 fi
+# Go back to the entry point.
+cd ..
 
 # Check if anomalies need to be detected.
 if [[ $detect_anomalies == true ]]; then
