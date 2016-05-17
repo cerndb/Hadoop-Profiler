@@ -91,7 +91,6 @@ do
     if [[ $enable_io == true ]]; then
         perf record --call-graph=fp -p $pid \
              -e 'sched:sched_switch' \
-             -e 'context-switches' \
              -e 'sched:sched_stat_sleep' \
              -e 'sched:sched_stat_blocked' -o perf.data.raw -- sleep $sampling_duration &&
         perf inject -s -i perf.data.raw -o perf.data &&
