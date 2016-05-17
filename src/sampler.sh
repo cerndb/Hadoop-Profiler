@@ -93,7 +93,7 @@ do
              -e 'sched:sched_switch' \
              -e 'sched:sched_stat_sleep' \
              -e 'sched:sched_stat_blocked' -o perf.data.raw -- sleep $sampling_duration &&
-        perf inject -i perf.data.raw -o perf.data &&
+        perf inject -s -i perf.data.raw -o perf.data &&
         $(eval $cmd) &&
         chown root $mapfile &&
         chmod 666 $mapfile &&
