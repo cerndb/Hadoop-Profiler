@@ -90,15 +90,15 @@ do
     # Check if I/O sampling needs to be performed.
     if [[ $enable_io == true ]]; then
         perf record -T -F $sampling_frequency -a -g -p $pid \
-             -e sched:sched_switch \
-             -e sched:sched_stat_sleep \
-             -e sched:sched_process_exit -o perf.data.raw -- sleep $sampling_duration &&
+             -e 'sched:sched_switch' \
+             -e 'sched:sched_stat_sleep' \
+             -e 'sched:sched_stat_blocked' -o perf.data.raw -- sleep $sampling_duration &&
         perf inject -v -s -i perf.data.raw -o perf.data &&
         $(eval $cmd) &&
         chown root $mapfile &&
         chmod 666 $mapfile &&
         cp $mapfile $current_dir/ &&
-        cd $current_dir && perf script -f comm,pid,tid,cpu,time,event,ip,sym,dso,trace | \
+        cd $current_dir && perf script -f comm,pid,tid,cpu,time,event,ip,sym,dso,trace -i perf.data | \
             awk 'NF > 4 { exec = $1; period_ms = int($5 / 1000000) }
                  NF > 1 && NF <= 4 && period_ms > 0 { print $2 }
                  NF < 2 && period_ms > 0 { printf "%s\n%d\n\n", exec, period_ms }' | \
