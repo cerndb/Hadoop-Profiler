@@ -1,3 +1,4 @@
+
 #/bin/sh
 
 #
@@ -92,7 +93,7 @@ do
              -e sched:sched_switch \
              -e sched:sched_stat_sleep \
              -e sched:sched_process_exit -o perf.data.raw -- sleep $sampling_duration &&
-        perf inject -v -s -i perf.data.raw -o perf.data
+        perf inject -v -s -i perf.data.raw -o perf.data &&
         $(eval $cmd) &&
         chown root $mapfile &&
         chmod 666 $mapfile &&
