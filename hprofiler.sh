@@ -109,7 +109,7 @@ if [[ -z $hosts ]]; then
         echo "YARN REST API has not been specified."
         exit 1
     fi
-    output=$(python src/fetch_yarn_nodes.py $cluster $job)
+    output=$(python2 src/fetch_yarn_nodes.py $cluster $job)
     IFS="," read -ra hosts <<< "$output"
     num_hosts=${#hosts[@]}
     # Check if a sufficient number has been fetched from YARN.
@@ -139,10 +139,18 @@ rm -rf aggregated
 mkdir aggregated
 destination_file=aggregated/stackcollapse.data
 data_files=$(ls profiler_*/*/stackcollapse.data | tr "\n" " ")
-python $current_directory/src/stack_aggregation.py $destination_file $data_files
+python2 $current_directory/src/stack_aggregation.py $destination_file $data_files
 cat aggregated/stackcollapse.data | $current_directory/src/flamegraph/flamegraph.pl --color=java --hash > aggregated/flamegraph.svg
 # Clear the empty directories.
 find profiler_* -type d -empty -delete
+
+if [[ $enable_io == true ]]; then
+    countname=ns
+    color=io
+else
+    countname=samples
+    color=java
+fi
 
 # Check if the Hadoop extraction needs to be done.
 if [[ $extract_hadoop == true ]]; then
@@ -151,8 +159,8 @@ if [[ $extract_hadoop == true ]]; then
     # Filter out non Hadoop related information.
     cat stackcollapse.data | grep JavaThread::run | sed -r 's/^.{29}//' > stackcollapse_hadoop.data
     # Generate the associated FlameGraph.
-    cat stackcollapse_hadoop.data | $current_directory/src/flamegraph/flamegraph.pl --color=java --hash > aggregated/flamegraph_hadoop.svg
-    # Move back to th upper folder.
+    cat stackcollapse_hadoop.data | $current_directory/src/flamegraph/flamegraph.pl --countname=$countname --colors=$color --hash > aggregated/flamegraph_hadoop.svg
+    # Move back to the upper folder.
     cd ..
 fi
 # Go back to the entry point.
@@ -165,7 +173,7 @@ if [[ $detect_anomalies == true ]]; then
     echo "------------------"
     # Fetch the absolute directory of the results folder.
     # Execute the outlier detection script.
-    python $current_directory/src/outlier_detection.py $output_directory
+    python2 $current_directory/src/outlier_detection.py $output_directory
     # Identifying the majority and anomily sets.
     echo "------------------"
     echo "Done"

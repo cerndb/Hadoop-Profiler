@@ -1,4 +1,3 @@
-
 #/bin/sh
 
 #
@@ -16,7 +15,7 @@
 
 ## BEGIN Scripts constants. ####################################################
 
-JAVA_HOME=/usr/lib/jvm/jdk1.8.0_60
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk
 
 ## END Scripts constants. ######################################################
 
@@ -57,8 +56,9 @@ if [[ "$AGENT_OUT" == "" || "$AGENT_JAR" == "" ]]; then
 fi
 
 # Fetch the PID's of the mappers.
-pids=$(ps aux | grep -v std | grep -v container-executor | grep -v pts | $job | awk '{print $2}')
-# pids=$(ps aux | grep jhermans | grep -v root | $job | awk '{print $2}')
+pids=$(ps aux | $job | awk '{print $2}')
+#pids=$(ps aux | grep -v root | grep spark | $job | awk '{print $2}')
+# FIXME Job pipelining.
 
 # Check if pids are availabl.
 if [[ -z $pids ]]; then
@@ -93,13 +93,16 @@ do
              -e 'sched:sched_switch' \
              -e 'sched:sched_stat_sleep' \
              -e 'sched:sched_stat_blocked' -o perf.data.raw -- sleep $sampling_duration &&
-        perf inject -i -s perf.data.raw -o perf.data &&
+        perf inject -s -i perf.data.raw -o perf.data &&
         $(eval $cmd) &&
         chown root $mapfile &&
         chmod 666 $mapfile &&
         cp $mapfile $current_dir/ &&
-        cd $current_dir && perf script -f comm,pid,tid,cpu,time,event,ip,sym,dso,trace -i perf.data | \
-            $scripts_root/flamegraph/stackcollapse-perf.pl > stackcollapse.data 2>&1 &
+        cd $current_dir && perf script -F comm,pid,tid,cpu,time,period,event,ip,sym,dso,trace | \
+            awk 'NF > 4 { exec = $1; period_ms = int($5 / 1000000) }
+    		 NF > 1 && NF <= 4 && period_ms > 0 { print $2 }
+    		 NF < 2 && period_ms > 0 { printf "%s\n%d\n\n", exec, period_ms }' | \
+            $scripts_root/flamegraph/stackcollapse.pl > stackcollapse.data 2>&1 &
     else
         perf record -F $sampling_frequency -o perf.data -a -g -p $pid -- sleep $sampling_duration &&
         $(eval $cmd) &&
@@ -131,14 +134,16 @@ do
 done <<< "$pids"
 
 # Aggregate all data files.
-python $scripts_root/stack_aggregation.py $destination_file $data_files
+python2 $scripts_root/stack_aggregation.py $destination_file $data_files
 
 # Set the default coloring method of the flamegraph, in the other case, set the io color.
 if [[ $enable_io == true ]]; then
     color=io
+    countname=ns
 else
     color=java
+    countname=samples
 fi
 
 # Aggreate stackcollapse data to a flamegraph on host level.
-cat aggregated/stackcollapse.data | $scripts_root/flamegraph/flamegraph.pl --color=$color --hash > aggregated/flamegraph.svg
+cat aggregated/stackcollapse.data | $scripts_root/flamegraph/flamegraph.pl --countname=$countname --color=$color --hash > aggregated/flamegraph.svg
