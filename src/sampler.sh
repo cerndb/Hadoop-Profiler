@@ -56,11 +56,10 @@ if [[ "$AGENT_OUT" == "" || "$AGENT_JAR" == "" ]]; then
 fi
 
 # Fetch the PID's of the mappers.
-pids=$(ps aux | $job | awk '{print $2}')
-#pids=$(ps aux | grep -v root | grep spark | $job | awk '{print $2}')
-# FIXME Job pipelining.
+selector="ps aux | $job | awk '{print \$2}'"
+pids=$(eval $selector)
 
-# Check if pids are availabl.
+# Check if pids are available.
 if [[ -z $pids ]]; then
     echo "ERROR: No PIDs available on $host"
     exit 1
